@@ -1,0 +1,58 @@
+name: First flow
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  setup-web:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout action
+        uses: actions/checkout@v3
+
+      - name: Deploy using ssh
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          script: |
+            cd /var/www/portfolio/
+            sudo git pull origin main
+            sudo npm install --only=prod
+            sudo npm run build
+            sudo pm2 reload web
+
+      # - name: Node
+      #   uses: actions/setup-node@v2
+
+      # - name: Install NPM
+      #   run: >
+      #     sudo npm install -g npm
+
+      # - name: Install PM2
+      #   run: >
+      #     sudo npm install -g pm2
+
+      # - name: Install node dependencies
+      #   run: >
+      #     sudo npm ci && npm run build --ignore-scripts
+
+      # - name: Reload pm2
+      #   run: >
+      #     sudo pm2 reload web
+
+  # goodbye:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: bye world
+  #       run: >
+  #         echo "Bye madefpaker!"
+  #       shell: bash
